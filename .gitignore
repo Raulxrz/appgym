@@ -1,0 +1,16 @@
+node_modules/
+.next/
+out/
+next-env.d.ts
+*.tsbuildinfo
+.env
+.env.local
+.env*.local
+.vercel/
+# Excel personales: en el repositorio solo van las plantillas vacías de templates/
+/*.xlsx
+
+# Temporales de editores: pueden contener copias de .env.local
+*.swp
+*.swo
+*~
