@@ -66,6 +66,13 @@ export async function requireSession(): Promise<Session> {
   }
 }
 
+/** Motivo que da Google en un error, sin registrar nada del contenido de la petición. */
+async function errorReason(res: Response): Promise<string> {
+  const body = await res.json().catch(() => null);
+  const error = body?.error;
+  return error?.errors?.[0]?.reason ?? error?.details?.find((d: { reason?: string }) => d.reason)?.reason ?? error?.status ?? "desconocido";
+}
+
 async function driveFetch(session: Session, url: string, init: RequestInit = {}): Promise<Response> {
   const res = await fetch(url, {
     ...init,
@@ -74,7 +81,21 @@ async function driveFetch(session: Session, url: string, init: RequestInit = {})
   });
   if (res.ok) return res;
   if (res.status === 401) throw new ApiError(401, "La sesión de Google ha caducado");
-  if (res.status === 403 || res.status === 404) {
+  if (res.status === 403) {
+    const reason = await errorReason(res);
+    console.error(`Drive respondió 403: ${reason}`);
+    if (reason === "accessNotConfigured" || reason === "SERVICE_DISABLED") {
+      throw new ApiError(503, "Google Drive API no está habilitada en el proyecto de Google Cloud de esta app.");
+    }
+    if (reason === "insufficientPermissions" || reason === "insufficientScopes" || reason === "ACCESS_TOKEN_SCOPE_INSUFFICIENT") {
+      throw new ApiError(403, "Falta el permiso de Drive. Sal de la app y vuelve a entrar marcando la casilla de acceso a Drive.");
+    }
+    if (reason === "userRateLimitExceeded" || reason === "rateLimitExceeded") {
+      throw new ApiError(503, "Google Drive está limitando las peticiones. Se reintentará.");
+    }
+    throw new ApiError(404, "La app no tiene acceso a este archivo. Vuelve a elegirlo desde Drive.");
+  }
+  if (res.status === 404) {
     throw new ApiError(404, "La app no tiene acceso a este archivo. Vuelve a elegirlo desde Drive.");
   }
   if (res.status === 429) throw new ApiError(503, "Google Drive está limitando las peticiones. Se reintentará.");
