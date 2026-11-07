@@ -102,7 +102,8 @@ async function driveFetch(session: Session, url: string, init: RequestInit = {})
   throw new ApiError(502, "Google Drive no ha respondido correctamente");
 }
 
-export type DriveFile = { id: string; name: string; modifiedTime?: string; webViewLink?: string };
+export type DriveFile = { id: string; name: string; modifiedTime?: string; webViewLink?: string; appProperties?: Record<string, string> };
+const FILE_FIELDS = "id,name,modifiedTime,webViewLink,appProperties";
 
 const assertFileId = (id: string) => {
   if (!/^[\w-]{10,200}$/.test(id)) throw new ApiError(400, "Identificador de archivo no válido");
@@ -111,7 +112,7 @@ const assertFileId = (id: string) => {
 export async function listFiles(session: Session): Promise<DriveFile[]> {
   const params = new URLSearchParams({
     q: `mimeType='${XLSX_MIME}' and trashed=false`,
-    fields: "files(id,name,modifiedTime,webViewLink)",
+    fields: `files(${FILE_FIELDS})`,
     orderBy: "modifiedTime desc",
     pageSize: "50",
   });
@@ -143,20 +144,37 @@ export async function uploadFile(session: Session, id: string, data: Uint8Array)
   });
 }
 
-export async function createFile(session: Session, name: string, data: Uint8Array): Promise<DriveFile> {
+export async function createFile(session: Session, name: string, data: Uint8Array, appProperties?: Record<string, string>): Promise<DriveFile> {
   const boundary = `asymettry${crypto.randomUUID()}`;
   const body = Buffer.concat([
     Buffer.from(
-      `--${boundary}\r\nContent-Type: application/json; charset=UTF-8\r\n\r\n${JSON.stringify({ name, mimeType: XLSX_MIME })}\r\n` +
+      `--${boundary}\r\nContent-Type: application/json; charset=UTF-8\r\n\r\n${JSON.stringify({ name, mimeType: XLSX_MIME, ...(appProperties ? { appProperties } : {}) })}\r\n` +
         `--${boundary}\r\nContent-Type: ${XLSX_MIME}\r\n\r\n`,
     ),
     Buffer.from(data),
     Buffer.from(`\r\n--${boundary}--`),
   ]);
-  const res = await driveFetch(session, `${URLS.upload}/files?uploadType=multipart&fields=id,name,modifiedTime,webViewLink`, {
+  const res = await driveFetch(session, `${URLS.upload}/files?uploadType=multipart&fields=${FILE_FIELDS}`, {
     method: "POST",
     headers: { "Content-Type": `multipart/related; boundary=${boundary}` },
     body,
+  });
+  return res.json();
+}
+
+export async function getFile(session: Session, id: string): Promise<DriveFile> {
+  assertFileId(id);
+  const res = await driveFetch(session, `${URLS.drive}/files/${id}?fields=${FILE_FIELDS}`);
+  return res.json();
+}
+
+/** Guarda datos de la app en el propio archivo (invisibles en el Excel). */
+export async function setAppProperties(session: Session, id: string, appProperties: Record<string, string>): Promise<DriveFile> {
+  assertFileId(id);
+  const res = await driveFetch(session, `${URLS.drive}/files/${id}?fields=${FILE_FIELDS}`, {
+    method: "PATCH",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ appProperties }),
   });
   return res.json();
 }

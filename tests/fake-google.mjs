@@ -59,11 +59,19 @@ http.createServer(async (req, res) => {
 
   const fileMatch = /^\/drive\/v3\/files\/([\w-]+)$/.exec(path);
   if (path === "/drive/v3/files") {
-    return json(res, 200, { files: [...files.values()].map(({ id, name }) => ({ id, name, modifiedTime: new Date().toISOString() })) });
+    return json(res, 200, { files: [...files.values()].map(({ id, name, appProperties }) => ({ id, name, appProperties, modifiedTime: new Date().toISOString() })) });
   }
   if (fileMatch) {
     const file = files.get(fileMatch[1]);
     if (!file) return json(res, 404, {});
+    if (req.method === "PATCH") {
+      const { appProperties } = JSON.parse((await read(req)).toString("utf8"));
+      file.appProperties = { ...file.appProperties, ...appProperties };
+      return json(res, 200, { id: file.id, name: file.name, appProperties: file.appProperties });
+    }
+    if (url.searchParams.get("fields")?.includes("appProperties")) {
+      return json(res, 200, { id: file.id, name: file.name, appProperties: file.appProperties });
+    }
     if (url.searchParams.get("alt") === "media") {
       res.writeHead(200);
       return res.end(file.data);
@@ -78,8 +86,8 @@ http.createServer(async (req, res) => {
     const meta = JSON.parse(Buffer.from(parts[1].split("\r\n\r\n")[1].trim(), "latin1").toString("utf8"));
     const content = parts[2].slice(parts[2].indexOf("\r\n\r\n") + 4, -2);
     const id = `file-${String(++seq).padStart(12, "0")}`;
-    files.set(id, { id, name: meta.name, data: Buffer.from(content, "latin1"), rev: 1 });
-    return json(res, 200, { id, name: meta.name });
+    files.set(id, { id, name: meta.name, appProperties: meta.appProperties, data: Buffer.from(content, "latin1"), rev: 1 });
+    return json(res, 200, { id, name: meta.name, appProperties: meta.appProperties });
   }
   const uploadMatch = /^\/upload\/drive\/v3\/files\/([\w-]+)$/.exec(path);
   if (uploadMatch && req.method === "PATCH") {

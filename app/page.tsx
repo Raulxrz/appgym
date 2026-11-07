@@ -96,7 +96,7 @@ function AppPreview() {
 
 export default async function Home({ searchParams }: { searchParams: Promise<{ error?: string }> }) {
   const session = await readSession();
-  if (session) return <App email={session.email} />;
+  if (session) return <App email={session.email} name={session.name} />;
   const { error } = await searchParams;
   return (
     <div className="site">

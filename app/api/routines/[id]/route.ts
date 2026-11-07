@@ -1,5 +1,5 @@
 import { assertSameOrigin, handle } from "@/lib/api";
-import { ApiError, downloadFile, fileRevision, requireSession, uploadFile } from "@/lib/google";
+import { ApiError, downloadFile, fileRevision, getFile, requireSession, uploadFile } from "@/lib/google";
 import { parseRoutine, writableCells } from "@/lib/routine";
 import { patchCells, readCells } from "@/lib/xlsx";
 
@@ -12,7 +12,8 @@ export async function GET(_request: Request, { params }: Context) {
   return handle(async () => {
     const { id } = await params;
     const session = await requireSession();
-    return { routine: parseRoutine(await readCells(await downloadFile(session, id))) };
+    const [file, data] = await Promise.all([getFile(session, id), downloadFile(session, id)]);
+    return { file, routine: parseRoutine(await readCells(data)) };
   });
 }
 
