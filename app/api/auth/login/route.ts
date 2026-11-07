@@ -7,7 +7,7 @@ import { seal, secureCookies } from "@/lib/session";
 export async function GET() {
   const state = randomBytes(24).toString("base64url");
   const verifier = randomBytes(48).toString("base64url");
-  (await cookies()).set("appgym_oauth", seal({ state, verifier }), {
+  (await cookies()).set("asymettry_oauth", seal({ state, verifier }), {
     httpOnly: true,
     sameSite: "lax",
     secure: secureCookies(),

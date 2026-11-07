@@ -1,4 +1,4 @@
-# AppGym
+# Asymettry
 
 Registro de entrenamientos por microciclos que guarda cada serie en tu propio Excel de Google Drive.
 

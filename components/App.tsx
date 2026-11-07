@@ -4,11 +4,14 @@ import type { DriveFile } from "@/lib/google";
 import { nextPosition, previousLog, type Routine } from "@/lib/routine";
 import { readPending, useSaver, type SaveStatus } from "@/lib/use-saver";
 import AddRoutine from "./AddRoutine";
+import Logo from "./Logo";
 import SetEditor from "./SetEditor";
 
-const ACTIVE_KEY = "appgym.activeFile";
+const ACTIVE_KEY = "asymettry.activeFile";
+// Clave anterior al cambio de nombre, para recordar la rutina abierta.
+const LEGACY_ACTIVE_KEY = "appgym.activeFile";
 const store = {
-  get: () => { try { return localStorage.getItem(ACTIVE_KEY); } catch { return null; } },
+  get: () => { try { return localStorage.getItem(ACTIVE_KEY) ?? localStorage.getItem(LEGACY_ACTIVE_KEY); } catch { return null; } },
   set: (id: string) => { try { localStorage.setItem(ACTIVE_KEY, id); } catch { /* preferencia opcional */ } },
 };
 
@@ -126,7 +129,7 @@ export default function App({ email }: { email: string }) {
   return (
     <div className="shell">
       <header className="topbar">
-        <strong className="brand">AppGym</strong>
+        <span className="brand"><Logo size={26} /></span>
         {files && files.length > 0 && (
           <label className="routine-picker">
             <span className="sr-only">Rutina</span>
@@ -150,7 +153,9 @@ export default function App({ email }: { email: string }) {
 
       {files && files.length === 0 && (
         <main className="welcome">
+          <p className="eyebrow eyebrow-accent">Primer paso</p>
           <h1>Elige con qué rutina empezar</h1>
+          <p className="muted welcome-lead">Usa un Excel que ya tengas en Drive o crea una copia vacía de una de nuestras rutinas.</p>
           <AddRoutine onAdded={onAdded} onExpired={() => setExpired(true)} />
         </main>
       )}

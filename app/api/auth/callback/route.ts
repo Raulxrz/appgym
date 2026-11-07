@@ -14,8 +14,8 @@ function sameText(a: string, b: string) {
 export async function GET(request: NextRequest) {
   const fail = (code: string) => NextResponse.redirect(`${process.env.APP_URL}/?error=${code}`);
   const jar = await cookies();
-  const pending = unseal<{ state: string; verifier: string }>(jar.get("appgym_oauth")?.value ?? "");
-  jar.delete({ name: "appgym_oauth", path: "/api/auth" });
+  const pending = unseal<{ state: string; verifier: string }>(jar.get("asymettry_oauth")?.value ?? "");
+  jar.delete({ name: "asymettry_oauth", path: "/api/auth" });
 
   const { searchParams } = request.nextUrl;
   const code = searchParams.get("code");

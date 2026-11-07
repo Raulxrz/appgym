@@ -144,7 +144,7 @@ export async function uploadFile(session: Session, id: string, data: Uint8Array)
 }
 
 export async function createFile(session: Session, name: string, data: Uint8Array): Promise<DriveFile> {
-  const boundary = `appgym${crypto.randomUUID()}`;
+  const boundary = `asymettry${crypto.randomUUID()}`;
   const body = Buffer.concat([
     Buffer.from(
       `--${boundary}\r\nContent-Type: application/json; charset=UTF-8\r\n\r\n${JSON.stringify({ name, mimeType: XLSX_MIME })}\r\n` +

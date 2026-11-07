@@ -11,13 +11,13 @@ export type Session = {
   refreshToken: string;
 };
 
-const COOKIE = "appgym_session";
+const COOKIE = "asymettry_session";
 const MAX_AGE = 60 * 60 * 24 * 180;
 
 function key(): Buffer {
   const secret = process.env.SESSION_SECRET;
   if (!secret || secret.length < 32) throw new Error("SESSION_SECRET debe tener al menos 32 caracteres");
-  return Buffer.from(hkdfSync("sha256", secret, "appgym", "session-cookie", 32));
+  return Buffer.from(hkdfSync("sha256", secret, "asymettry", "session-cookie", 32));
 }
 
 export function seal(value: unknown): string {

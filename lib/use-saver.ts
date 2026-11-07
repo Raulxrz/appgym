@@ -6,11 +6,13 @@ import type { Routine } from "./routine";
 export type SaveStatus = "idle" | "pending" | "saving" | "saved" | "retrying" | "expired";
 
 const DEBOUNCE_MS = 1500;
-const storageKey = (fileId: string) => `appgym.pending.${fileId}`;
+const storageKey = (fileId: string) => `asymettry.pending.${fileId}`;
+// Clave anterior al cambio de nombre: se lee una vez para no perder cambios sin subir.
+const legacyKey = (fileId: string) => `appgym.pending.${fileId}`;
 
 export function readPending(fileId: string): Record<string, string> {
   try {
-    return JSON.parse(localStorage.getItem(storageKey(fileId)) ?? "{}");
+    return JSON.parse(localStorage.getItem(storageKey(fileId)) ?? localStorage.getItem(legacyKey(fileId)) ?? "{}");
   } catch {
     return {};
   }
@@ -18,6 +20,7 @@ export function readPending(fileId: string): Record<string, string> {
 
 function writePending(fileId: string, pending: Record<string, string>) {
   try {
+    localStorage.removeItem(legacyKey(fileId));
     if (Object.keys(pending).length) localStorage.setItem(storageKey(fileId), JSON.stringify(pending));
     else localStorage.removeItem(storageKey(fileId));
   } catch {
