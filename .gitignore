@@ -14,3 +14,6 @@ next-env.d.ts
 *.swp
 *.swo
 *~
+
+# Salida de trabajo de la skill taste-skill
+.taste-skill/
