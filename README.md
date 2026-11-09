@@ -14,7 +14,7 @@ En [Google Cloud Console](https://console.cloud.google.com/):
 
 1. Crea un proyecto y anota el **número de proyecto** (en *Panel*).
 2. En *APIs y servicios > Biblioteca*, habilita **Google Drive API** y **Google Picker API**.
-3. En *Google Auth Platform > Marca*, indica el nombre de la app, tu correo, y las URL de la página principal y de `/privacidad`.
+3. En *Google Auth Platform > Marca*, indica el nombre de la app, tu correo, y las URL de la página principal, de `/privacidad` (política de privacidad) y de `/terminos` (condiciones del servicio).
 4. En *Público*, elige **Externo** y pulsa **Publicar app** para pasarla a producción. En modo de prueba solo entran las cuentas dadas de alta.
 5. En *Acceso a datos*, añade solo `openid`, `email`, `profile` y `.../auth/drive.file`.
 6. En *Clientes*, crea un cliente **Aplicación web** con:
