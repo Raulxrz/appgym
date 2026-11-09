@@ -9,12 +9,12 @@ const ERRORS: Record<string, string> = {
   google: "Google no ha podido completar el inicio de sesión. Vuelve a intentarlo.",
 };
 
-const PREVIEW_COLUMNS = ["Micro 1", "Micro 2", "Micro 3", "Descarga"];
-const PREVIEW_ROWS = [
-  { name: "Press banca", targets: "6 · 10 reps", logs: ["82.5x7 / 70x11", "85x6 / 72.5x10", null, null] },
-  { name: "Remo con barra", targets: "8 · 12 reps", logs: ["70x8 / 60x12", "72.5x8 / 60x12", null, null] },
-  { name: "Press militar", targets: "8 · 10 reps", logs: ["45x8 / 37.5x10", null, null, null] },
-  { name: "Fondos lastrados", targets: "10 reps", logs: ["10x10+P4", null, null, null] },
+// Datos de ejemplo tomados de la rutina "Doble pierna en 5 días".
+const PREVIEW_STEPS = ["done", "done", "current", "", "", "", "", ""];
+const PREVIEW_SETS = [
+  { label: "Top set", value: "25 × 10", state: "done" },
+  { label: "Resto 1", value: "20 × 14", state: "done" },
+  { label: "Resto 2", value: "—", state: "current" },
 ];
 
 const STEPS = [
@@ -41,54 +41,53 @@ function AppPreview() {
       <div className="preview-window">
         <div className="preview-bar">
           <span className="preview-dots"><i /><i /><i /></span>
-          <span className="preview-file">ENTRENO 19 (Asymettry)</span>
+          <span className="preview-file">Asymettry (Doble pierna en 5 días)</span>
           <span className="preview-saved">Guardado en Drive</span>
         </div>
-        <div className="preview-days">
-          <span className="preview-day preview-day-on">Día 1 · Push</span>
-          <span className="preview-day">Día 2 · Piernas</span>
-          <span className="preview-day">Día 3 · Tirón</span>
-        </div>
-        <div className="preview-grid">
-          <span className="preview-head preview-name">Ejercicio</span>
-          {PREVIEW_COLUMNS.map((c, i) => (
-            <span key={c} className={`preview-head${i === 1 ? " preview-current" : ""}`}>{c}</span>
-          ))}
-          {PREVIEW_ROWS.map((r, row) => (
-            <div key={r.name} className="preview-row">
-              <span className="preview-name">
-                <b>{r.name}</b>
-                <small>{r.targets}</small>
+        <div className="preview-session">
+          <p className="eyebrow eyebrow-accent">Microciclo 2</p>
+          <p className="preview-day-title">Día 1 · Push + Brazo</p>
+          <p className="preview-when">Programado para hoy</p>
+          <div className="preview-progress">
+            {PREVIEW_STEPS.map((step, i) => <i key={i} className={step ? "preview-step-" + step : undefined} />)}
+          </div>
+          <p className="eyebrow">Ejercicio 3 de 8</p>
+          <p className="preview-exercise">Elevaciones laterales con máquina</p>
+          <div className="preview-tags">
+            <span className="preview-tag preview-tag-strong">top set: 1x?(0) / resto: 2x?(0)</span>
+            <span className="preview-tag">Objetivo 8-11 · resto 11-16 reps</span>
+          </div>
+          <div className="preview-prev">
+            <span className="eyebrow">Sesión anterior</span>
+            <b>22.5x10 / 20x13 / 20x12</b>
+          </div>
+          <div className="preview-pills">
+            {PREVIEW_SETS.map((set) => (
+              <span key={set.label} className={"preview-pill preview-pill-" + set.state}>
+                <small>{set.label}</small>
+                <b>{set.value}</b>
               </span>
-              {r.logs.map((log, i) => (
-                <span
-                  key={i}
-                  className={`preview-cell${i === 1 ? " preview-cell-current" : ""}${row === 2 && i === 1 ? " preview-cell-selected" : ""}`}
-                >
-                  {log ? <b>{log}</b> : <em>Apuntar</em>}
-                </span>
-              ))}
-            </div>
-          ))}
+            ))}
+          </div>
         </div>
       </div>
 
       <div className="preview-editor">
-        <p className="eyebrow">Microciclo 2</p>
-        <p className="preview-editor-title">Press militar</p>
-        <div className="preview-prev">
-          <span className="eyebrow">Sesión anterior</span>
-          <b>45x8 / 37.5x10</b>
+        <p className="eyebrow">Serie 3 de 3</p>
+        <p className="preview-editor-title">Resto 2</p>
+        <p className="preview-last">La última vez <b>20 × 12</b></p>
+        <div className="preview-inputs">
+          <div className="preview-input">
+            <small>Kg</small>
+            <span><i>−</i><b>20</b><i>+</i></span>
+          </div>
+          <em>×</em>
+          <div className="preview-input preview-input-on">
+            <small>Reps</small>
+            <span><i>−</i><b className="preview-caret">13</b><i>+</i></span>
+          </div>
         </div>
-        <div className="preview-set preview-set-done">
-          <span>Top 1</span><b>47.5</b><i>×</i><b>8</b><span className="preview-check">✓</span>
-        </div>
-        <div className="preview-set preview-set-done">
-          <span>Resto 1</span><b>40</b><i>×</i><b>10</b><span className="preview-check">✓</span>
-        </div>
-        <div className="preview-set">
-          <span>Resto 2</span><b>40</b><i>×</i><b className="preview-caret">9</b><span className="preview-check preview-check-off">✓</span>
-        </div>
+        <span className="preview-save">Guardar serie</span>
       </div>
     </div>
   );

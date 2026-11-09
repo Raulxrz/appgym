@@ -17,7 +17,7 @@ export const TEMPLATES: Template[] = [
     title: "PPL + Torso y Brazo",
     detail: "Tirón, empuje y pierna, con un día de torso y otro de brazo y hombro.",
     days: ["Pull", "Push", "Pierna", "Torso", "Brazo y hombro"],
-    fileName: "Entreno 1 · PPL + Torso y Brazo (Asymettry).xlsx",
+    fileName: "Asymettry (PPL + Torso y Brazo).xlsx",
     legacyName: /entreno\s*7\b/i,
   },
   {
@@ -26,7 +26,7 @@ export const TEMPLATES: Template[] = [
     title: "Doble pierna en 5 días",
     detail: "Empuje y tirón con brazo, un día de torso y dos días de pierna.",
     days: ["Push + Brazo", "Pierna 1", "Tirón + Brazo", "Torso", "Pierna 2"],
-    fileName: "Entreno 2 · Doble pierna en 5 días (Asymettry).xlsx",
+    fileName: "Asymettry (Doble pierna en 5 días).xlsx",
     legacyName: /entreno\s*19\b/i,
   },
 ];
