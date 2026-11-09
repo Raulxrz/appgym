@@ -31,6 +31,8 @@ export default function Terms() {
         <p>Puedes dejar de usar la app cuando quieras y retirar su acceso en los <a href="https://myaccount.google.com/permissions">permisos de tu cuenta de Google</a>. Podemos suspender el acceso a quien incumpla estos términos.</p>
         <h2>Cambios</h2>
         <p>Podemos actualizar estos términos. Si el cambio es importante, lo indicaremos en esta página con una nueva fecha. Seguir usando la app después supone aceptar la nueva versión.</p>
+        <h2>Contacto</h2>
+        <p>Para cualquier duda sobre estos términos, escribe a <a href="mailto:spa2008xx@gmail.com">spa2008xx@gmail.com</a>.</p>
         <p><Link className="button" href="/">Volver al inicio</Link></p>
       </main>
       <SiteFooter />

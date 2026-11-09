@@ -20,6 +20,8 @@ export default function Privacy() {
         <p>Con nadie. Los datos de Google solo se usan para el funcionamiento de la app.</p>
         <h2>Cómo retirar el acceso</h2>
         <p>Puedes retirarlo cuando quieras en los <a href="https://myaccount.google.com/permissions">permisos de tu cuenta de Google</a>. Tus Excel seguirán en tu Drive.</p>
+        <h2>Contacto</h2>
+        <p>Para cualquier duda sobre tus datos, escribe a <a href="mailto:spa2008xx@gmail.com">spa2008xx@gmail.com</a>.</p>
         <p><Link className="button" href="/">Volver al inicio</Link></p>
       </main>
       <SiteFooter />
