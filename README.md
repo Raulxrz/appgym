@@ -14,13 +14,14 @@ En [Google Cloud Console](https://console.cloud.google.com/):
 
 1. Crea un proyecto y anota el **número de proyecto** (en *Panel*).
 2. En *APIs y servicios > Biblioteca*, habilita **Google Drive API** y **Google Picker API**.
-3. En *Google Auth Platform > Marca*, indica el nombre de la app, tu correo, y las URL de la página principal, de `/privacidad` (política de privacidad) y de `/terminos` (condiciones del servicio).
-4. En *Público*, elige **Externo** y pulsa **Publicar app** para pasarla a producción. En modo de prueba solo entran las cuentas dadas de alta.
-5. En *Acceso a datos*, añade solo `openid`, `email`, `profile` y `.../auth/drive.file`.
-6. En *Clientes*, crea un cliente **Aplicación web** con:
+3. Verifica que la web es tuya en [Google Search Console](https://search.google.com/search-console) con la misma cuenta de Google del proyecto: añade una propiedad de tipo **Prefijo de URL** con tu URL de Vercel, elige el método **Etiqueta HTML**, copia el valor de `content="..."` en la variable `GOOGLE_SITE_VERIFICATION` de Vercel, vuelve a desplegar y pulsa **Verificar**. Sin esto, Google no deja publicar la app.
+4. En *Google Auth Platform > Marca*, indica el nombre de la app, tu correo, y las URL de la página principal, de `/privacidad` (política de privacidad) y de `/terminos` (condiciones del servicio).
+5. En *Público*, elige **Externo** y pulsa **Publicar app** para pasarla a producción. En modo de prueba solo entran las cuentas dadas de alta.
+6. En *Acceso a datos*, añade solo `openid`, `email`, `profile` y `.../auth/drive.file`.
+7. En *Clientes*, crea un cliente **Aplicación web** con:
    - Orígenes de JavaScript: `http://localhost:3000` y tu URL de Vercel.
    - URI de redirección: `http://localhost:3000/api/auth/callback` y `https://TU-APP.vercel.app/api/auth/callback`.
-7. En *Credenciales*, crea una **clave de API** y restríngela a Google Picker API y a tus dominios (`http://localhost:3000/*` y `https://TU-APP.vercel.app/*`).
+8. En *Credenciales*, crea una **clave de API** y restríngela a Google Picker API y a tus dominios (`http://localhost:3000/*` y `https://TU-APP.vercel.app/*`).
 
 ## Ejecutar en local
 

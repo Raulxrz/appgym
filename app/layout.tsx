@@ -9,6 +9,8 @@ export const metadata: Metadata = {
   title: { default: "Asymettry", template: "%s · Asymettry" },
   description: "Registra tus entrenamientos por microciclos en tus propios Excel de Google Drive.",
   applicationName: "Asymettry",
+  // Etiqueta de Google Search Console para demostrar que el dominio es tuyo.
+  verification: process.env.GOOGLE_SITE_VERIFICATION ? { google: process.env.GOOGLE_SITE_VERIFICATION } : undefined,
 };
 
 export const viewport: Viewport = {
