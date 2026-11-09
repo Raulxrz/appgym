@@ -35,6 +35,7 @@ export function useSaver(fileId: string | null, onSaved: (routine: Routine) => v
   const pending = useRef<Record<string, string>>({});
   const timer = useRef<ReturnType<typeof setTimeout> | undefined>(undefined);
   const busy = useRef(false);
+  const inFlight = useRef<Promise<void>>(Promise.resolve());
   const failures = useRef(0);
   const onSavedRef = useRef(onSaved);
   onSavedRef.current = onSaved;
@@ -45,6 +46,8 @@ export function useSaver(fileId: string | null, onSaved: (routine: Routine) => v
     if (!fileId || busy.current || !Object.keys(pending.current).length) return;
     clearTimeout(timer.current);
     busy.current = true;
+    let settled = () => {};
+    inFlight.current = new Promise((resolve) => { settled = resolve; });
     const sending = pending.current;
     pending.current = {};
     setStatus("saving");
@@ -92,6 +95,7 @@ export function useSaver(fileId: string | null, onSaved: (routine: Routine) => v
       }
     } finally {
       busy.current = false;
+      settled();
     }
     if (!stillActive()) {
       // Lo de la rutina nueva pudo quedar esperando a que terminara esta subida.
@@ -117,6 +121,18 @@ export function useSaver(fileId: string | null, onSaved: (routine: Routine) => v
     [fileId, flush],
   );
 
+  /** Descarta lo pendiente y espera a la subida en curso, para que nada se escriba después. */
+  const discard = useCallback(async () => {
+    clearTimeout(timer.current);
+    await inFlight.current;
+    clearTimeout(timer.current);
+    pending.current = {};
+    failures.current = 0;
+    if (fileId) writePending(fileId, {});
+    setMessage(null);
+    setStatus("idle");
+  }, [fileId]);
+
   // Recupera lo que quedó sin subir en una visita anterior.
   useEffect(() => {
     pending.current = fileId ? readPending(fileId) : {};
@@ -136,5 +152,5 @@ export function useSaver(fileId: string | null, onSaved: (routine: Routine) => v
     return () => window.removeEventListener("beforeunload", warn);
   }, []);
 
-  return { status, savedAt, message, queue, flush, pendingCells: () => pending.current };
+  return { status, savedAt, message, queue, flush, discard, pendingCells: () => pending.current };
 }

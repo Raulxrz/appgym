@@ -109,6 +109,11 @@ export function writableCells(routine: Routine): Set<string> {
   return new Set(routine.days.flatMap((d) => d.exercises.flatMap((e) => e.slots.map((s) => s.logCell))));
 }
 
+/** Celdas de registro que ya tienen algo apuntado. */
+export function loggedCells(routine: Routine): string[] {
+  return routine.days.flatMap((d) => d.exercises.flatMap((e) => e.slots.filter((s) => s.log).map((s) => s.logCell)));
+}
+
 /** Primer microciclo y día con algún ejercicio pautado sin registrar. */
 export function nextPosition(routine: Routine): { microcycle: number; day: number } {
   for (let microcycle = 0; microcycle < routine.microcycles.length; microcycle++) {

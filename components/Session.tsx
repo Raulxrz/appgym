@@ -1,8 +1,9 @@
 "use client";
 import { useState } from "react";
 import { dayComplete, dayParts, dayTitle, exerciseComplete, microcycleLabel, pretty } from "@/lib/labels";
-import { nextPosition, previousLog, type Routine } from "@/lib/routine";
+import { loggedCells, nextPosition, previousLog, type Routine } from "@/lib/routine";
 import { formatDate, plannedDate, toISODate, todayPlan, trainingDays, type Schedule } from "@/lib/schedule";
+import ConfirmDialog from "./ConfirmDialog";
 import ExerciseLogger from "./ExerciseLogger";
 
 type Position = { microcycle: number; day: number };
@@ -12,6 +13,7 @@ type Props = {
   schedule: Schedule | null;
   onChange: (cell: string, value: string) => void;
   onHome: () => void;
+  onReset: () => Promise<void>;
 };
 
 const firstOpen = (routine: Routine, pos: Position) =>
@@ -30,10 +32,27 @@ function whenText(routine: Routine, schedule: Schedule | null, pos: Position): s
     : `Programado para el ${formatDate(date)}`;
 }
 
-export default function Session({ routine, schedule, onChange, onHome }: Props) {
+export default function Session({ routine, schedule, onChange, onHome, onReset }: Props) {
   const [pos, setPos] = useState<Position>(() => nextPosition(routine));
   const [index, setIndex] = useState(() => Math.max(firstOpen(routine, nextPosition(routine)), 0));
   const [summary, setSummary] = useState(() => firstOpen(routine, nextPosition(routine)) < 0);
+
+  const [confirming, setConfirming] = useState(false);
+  const [resetting, setResetting] = useState(false);
+  const [resetError, setResetError] = useState<string | null>(null);
+
+  const confirmReset = async () => {
+    setResetting(true);
+    setResetError(null);
+    try {
+      await onReset();
+      setConfirming(false);
+    } catch (e) {
+      setResetError(e instanceof Error && e.message ? e.message : "No se ha podido reiniciar el progreso");
+    } finally {
+      setResetting(false);
+    }
+  };
 
   const day = routine.days[pos.day];
   const exercises = day.exercises;
@@ -168,6 +187,27 @@ export default function Session({ routine, schedule, onChange, onHome }: Props) 
             </div>
           )}
         </section>
+      )}
+
+      {loggedCells(routine).length > 0 && (
+        <div className="session-danger">
+          <button className="button button-danger" onClick={() => { setResetError(null); setConfirming(true); }}>Reiniciar progreso</button>
+        </div>
+      )}
+
+      {confirming && (
+        <ConfirmDialog
+          title="¿Reiniciar tu progreso?"
+          confirmLabel="Sí, reiniciar"
+          busyLabel="Reiniciando…"
+          busy={resetting}
+          error={resetError}
+          onConfirm={confirmReset}
+          onCancel={() => setConfirming(false)}
+        >
+          <p>Se borrarán todas las series apuntadas en este entreno, también las del Excel de Drive, y volverás al primer día.</p>
+          <p><strong>Esta acción no se puede deshacer.</strong></p>
+        </ConfirmDialog>
       )}
     </main>
   );

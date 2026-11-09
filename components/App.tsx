@@ -3,7 +3,7 @@ import { useCallback, useEffect, useRef, useState } from "react";
 import type { DriveFile } from "@/lib/google";
 import { XLSX_MIME_TYPE, openDrivePicker } from "@/lib/picker";
 import type { Routine } from "@/lib/routine";
-import { scheduleFromProperties, type Schedule } from "@/lib/schedule";
+import { scheduleFromProperties, toISODate, type Schedule } from "@/lib/schedule";
 import { templateOf } from "@/lib/templates";
 import { readPending, useSaver, type SaveStatus } from "@/lib/use-saver";
 import Logo from "./Logo";
@@ -52,6 +52,7 @@ export default function App({ email, name }: { email: string; name?: string }) {
   const [busy, setBusy] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [expired, setExpired] = useState(false);
+  const [resets, setResets] = useState(0);
 
   const saverPending = useRef<() => Record<string, string>>(() => ({}));
   const saver = useSaver(activeId, useCallback((saved: Routine) => {
@@ -162,6 +163,23 @@ export default function App({ email, name }: { email: string; name?: string }) {
     window.scrollTo({ top: 0 });
   };
 
+  const resetProgress = async (id: string) => {
+    await saver.discard();
+    const res = await fetch(`/api/routines/${id}/reset`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ today: toISODate(new Date()) }),
+    });
+    const body = await res.json().catch(() => ({}));
+    if (res.status === 401) { setExpired(true); throw new Error("Tu sesión de Google ha caducado"); }
+    if (!res.ok) throw new Error(body.error ?? "No se ha podido reiniciar el progreso");
+    setDetails((all) => ({ ...all, [id]: { routine: body.routine, file: { ...all[id]?.file, ...body.file } } }));
+    setFiles((list) => list?.map((f) => (f.id === id ? { ...f, ...body.file } : f)) ?? list);
+    // Se vuelve a montar la sesión para que arranque en el primer día.
+    setResets((n) => n + 1);
+    window.scrollTo({ top: 0 });
+  };
+
   const onCellChange = useCallback((cell: string, value: string) => {
     setActiveDetail((d) => ({ ...d, routine: applyChanges(d.routine, { [cell]: value }) }));
     saver.queue(cell, value);
@@ -225,7 +243,7 @@ export default function App({ email, name }: { email: string; name?: string }) {
       )}
 
       {view.name === "session" && current && (
-        <Session key={view.fileId} routine={current.routine} schedule={schedule} onChange={onCellChange} onHome={goHome} />
+        <Session key={`${view.fileId}-${resets}`} routine={current.routine} schedule={schedule} onChange={onCellChange} onHome={goHome} onReset={() => resetProgress(view.fileId)} />
       )}
     </div>
   );

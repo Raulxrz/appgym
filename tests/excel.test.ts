@@ -2,7 +2,7 @@ import { readFile } from "node:fs/promises";
 import { describe, expect, it } from "vitest";
 import JSZip from "jszip";
 import { patchCells, readCells } from "@/lib/xlsx";
-import { nextPosition, parseExerciseName, parseRoutine, previousLog, writableCells } from "@/lib/routine";
+import { loggedCells, nextPosition, parseExerciseName, parseRoutine, previousLog, writableCells } from "@/lib/routine";
 import { parsePrescription } from "@/lib/prescription";
 import { parseLog, serializeLog } from "@/lib/log-format";
 
@@ -174,5 +174,20 @@ describe("posición y sesión anterior", () => {
     const first = r.days[0].exercises[0];
     expect(previousLog(first, 2)).toEqual({ microcycle: 0, log: "50x5" });
     expect(previousLog(first, 0)).toBeUndefined();
+  });
+});
+
+describe("reinicio del progreso", () => {
+  it("vacía todo lo apuntado y vuelve al primer día", async () => {
+    const data = new Uint8Array(await readFile(E7));
+    const routine = parseRoutine(await readCells(data));
+    const [first, second] = routine.days.flatMap((d) => d.exercises).map((e) => e.slots[0].logCell);
+    const logged = await patchCells(data, { [first]: "60x8", [second]: "40x10" });
+    const cells = loggedCells(parseRoutine(await readCells(logged)));
+    expect(cells.sort()).toEqual([first, second].sort());
+
+    const reset = parseRoutine(await readCells(await patchCells(logged, Object.fromEntries(cells.map((c) => [c, ""])))));
+    expect(loggedCells(reset)).toEqual([]);
+    expect(nextPosition(reset)).toEqual(nextPosition(routine));
   });
 });
